@@ -4,7 +4,6 @@ from queue import PriorityQueue
 
 #the opposite direction of the free tile
 directions_dictionary = ['right', 'left', 'down', 'up']
-visited = []
 
 class State:
     def __init__(self, tiles, free_tile_location = None, g=0):
@@ -112,16 +111,13 @@ def a_star(current, goal, limit):
     if limit == 0:
         return False
 
-    visited.append(current)
     current.generate_children(goal.free_tile_location)
     while not current.children.empty():
         child = current.children.get()
-        if child not in visited:
-            #print(child.tiles)
-            #print(limit)
-            res = a_star(child, goal, limit - 1)
-            if res:
-                return res
+        res = a_star(child, goal, limit - 1)
+        if res:
+            return res
+
 
     return False
 
@@ -138,7 +134,6 @@ def print_result(steps, final_state):
 def iterative_deepening_a_star(start, goal, limit):
     for l in range(1, limit + 1):
         print("L: ", l)
-        visited.clear()
         res = a_star(start, goal, l)
         if res:
             print_result(l, res)
@@ -164,6 +159,4 @@ if not has_solution(start_state.to_array()):
 
 start_state.compute_heuristics_manhattan(free_tile_index)
 final_state = State(get_final_state(tiles, free_tile_index), (free_tile_index // size, free_tile_index % size))
-print("FINAL STATE")
-print(final_state.tiles)
 iterative_deepening_a_star(start_state, final_state, 50)
