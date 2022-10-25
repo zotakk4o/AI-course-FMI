@@ -1,14 +1,12 @@
-#include <cstdio>
 #include <cmath>
-#include <queue>
-#include <unordered_map>
-#include <utility>
 #include <vector>
 #include <algorithm>
 #include <iostream>
 #include <string.h>
-#include <stack>
+#include <chrono>
+#include <iomanip>
 using namespace std;
+using namespace std::chrono;
 
 int directions[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 string directionsDictionary[4] = { "down", "up", "right", "left" };
@@ -19,19 +17,8 @@ struct Table
 {
     vector<vector<int>> table;
     int h = 0;
-    int g = 0;
     int x, y;
     string moveTo;
-
-    int f() const
-    {
-        return g + h;
-    }
-
-    friend bool operator< (const Table& t1, const Table& t2)
-    {
-        return t1.f() < t2.f();
-    }
 
     bool operator==(const Table& t) const
     {
@@ -66,8 +53,6 @@ struct Table
             }  
     }
 };
-
-vector<string> path;
 
 int calculateHeuristicForPosition(const int& row, const int& column, int num)
 {
@@ -157,24 +142,17 @@ bool tableAlreadyPassed(const Table& t, const vector<Table>& passedTables)
     return false;
 }
 
-void aStar(Table& current, Table& goal, int limit)
+int aStar(vector<Table>& path, int g, int bound)
 {
-    if (current == goal) {
-        cout << path.size() << endl;
-        for (int i = 0; i < path.size(); i++) {
-            cout << path[i] << endl;
-        }
-        exit(0);
-    }
+    Table current = path.back();
+    int f = g + current.h;
+    if (f > bound) return f;
+    if (current == finalState) return 0;
+    int min = INT_MAX;
 
-    if (limit == 0) {
-        return;
-    }
-    
-    priority_queue<Table> pq;
-    Table child = current;
-    child.g = current.g + 1;
     //generate children
+    Table child = current;
+    int t;
     for (int i = 0; i < 4; i++) {
         int newX = current.x + directions[i][0];
         int newY = current.y + directions[i][1];
@@ -190,34 +168,54 @@ void aStar(Table& current, Table& goal, int limit)
             calculateHeuristicForPosition(newX, newY, current.table[current.x][current.y]);
 
         swap(child.table[current.x][current.y], child.table[newX][newY]);
+        if (std::find(path.begin(), path.end(), child) != path.end()) {
+            swap(child.table[current.x][current.y], child.table[newX][newY]);
+            continue;
+        }
         child.x = newX;
         child.y = newY;
         child.moveTo = directionsDictionary[i];
-        pq.push(child);
-        swap(child.table[current.x][current.y], child.table[newX][newY]);
-    }
 
-    while (!pq.empty()) {
-        Table currTable = pq.top();
-        pq.pop();
-        //path.push_back(currTable.moveTo);
-        aStar(currTable, goal, limit - 1);
-        //path.pop_back();
+        path.push_back(child);
+        t = aStar(path, g + 1, bound);
+        if (t == 0) return 0;
+        if (t < min) min = t;
+        swap(child.table[current.x][current.y], child.table[newX][newY]);
+        path.pop_back();
+    }
+    return min;
+}
+
+void printPath(vector<Table>& path) {
+    cout << path.size() - 1 << endl;
+    for (int i = 1; i < path.size(); i++) {
+        cout << path[i].moveTo << endl;
     }
 }
 
-void iterativeDeepeningAStar(int limit) {
-    for (int i = 1; i <= limit; i++) {
-        path.clear();
-        cout << i << endl;
-        aStar(startState, finalState, i);
+void iterativeDeepeningAStar() {
+    int bound = startState.h;
+    vector<Table> path;
+    path.push_back(startState);
+    int t;
+    auto start = high_resolution_clock::now();
+    while (true) {
+        t = aStar(path, 0, bound);
+        if (t == 0) break;
+        bound = t;
     }
+    auto stop = high_resolution_clock::now();
+    printPath(path);
+    auto duration = duration_cast<milliseconds>(stop - start);
+    cout << fixed;
+    cout << setprecision(2);
+    cout << "Time taken: " << duration.count() / 1000 << "s" << endl;
 }
 
 int main()
 {
     input();
-    iterativeDeepeningAStar(50);
+    iterativeDeepeningAStar();
 
     return 0;
 }
@@ -239,7 +237,13 @@ Some tests:
 
 8
 -1
-4 2 3
-5 0 1
+4 0 3
+5 2 1
 7 8 6
+
+8
+-1
+0 8 6
+5 4 3
+2 1 7
 **/
