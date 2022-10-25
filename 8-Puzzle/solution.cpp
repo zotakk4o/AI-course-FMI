@@ -209,7 +209,7 @@ void iterativeDeepeningAStar() {
     auto duration = duration_cast<milliseconds>(stop - start);
     cout << fixed;
     cout << setprecision(2);
-    cout << "Time taken: " << duration.count() / 1000 << "s" << endl;
+    cout << "Time taken: " << (float)duration.count() / 1000 << "s" << endl;
 }
 
 int main()
@@ -236,7 +236,6 @@ Some tests:
 7 8 6
 
 8
--1
 4 0 3
 5 2 1
 7 8 6
@@ -246,4 +245,11 @@ Some tests:
 0 8 6
 5 4 3
 2 1 7
+
+15
+-1
+8 11 1 12
+5 0 15 9
+13 14 4 10
+7 3 6 2
 **/
