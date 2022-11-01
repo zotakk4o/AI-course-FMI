@@ -94,46 +94,6 @@ int minConflictVal(const int& col) {
     return minConflicts;
 }
 
-//void updateConflicts(const int& row, const int& col, const bool& increase = true) {
-//    int size = board.size();
-//
-//    for (int left = col - 1; left >= 0; left--)
-//    {
-//        increase ? board[row][left]++ : board[row][left]--;//<-
-//    }
-//
-//    for (int right = col + 1; right < size; right++)
-//    {
-//        increase ? board[row][right]++ : board[row][right]--;//->
-//    }
-//
-//    for (int up = row + 1; up < size; up++)
-//    {
-//        increase ? board[up][col]++ : board[up][col]--;//^
-//    }
-//
-//    for (int down = row - 1; down >= 0; down--)
-//    {
-//        increase ? board[down][col]++ : board[down][col]--;//v
-//    }
-//
-//    for (int i = 1; row - i >= 0 && col + i < size; i++) {
-//        increase ? board[row - i][col + i]++ : board[row - i][col + i]--;//right up
-//    }
-//
-//    for (int i = 1; row + i < size && col + i < size; i++) {
-//        increase ? board[row + i][col + i]++ : board[row + i][col + i]--;//right down
-//    }
-//
-//    for (int i = 1; row - i >= 0 && col - i >= 0; i++) {
-//        increase ? board[row - i][col - i]++ : board[row - i][col - i]--;//left up
-//    }
-//
-//    for (int i = 1; row + i < size && col - i >= 0; i++) {
-//        increase ? board[row + i][col - i]++ : board[row + i][col - i]--;//left down
-//    }
-//}
-
 void updateConflicts(const int& row, const int& col, const bool& increase = true, const bool& isInit = false) {
     int size = board.size();
 
@@ -332,7 +292,7 @@ bool iterativeMinConflicts(int iterations) {
             continue;
         }
         int minRow = queen.first;
-        //try moving the randomly chosen queen
+        //find min conflicts position
         for (int row = 0; row < n; row++) {
             if (board[row][queen.second] < minAttacks) {
                 minAttacks = board[row][queen.second];
@@ -343,26 +303,23 @@ bool iterativeMinConflicts(int iterations) {
         for (int row = 0; row < n; row++) {
             if (board[row][queen.second] == minAttacks && row != queen.first) {
                 possibleMinimas[++possiblePositions] = row;
-                
             }
         }
         if (possiblePositions == -1) {
-            continue;
+            continue;//nowhere to move
         }
         uniform_int_distribution<> distrMin(0, possiblePositions);
         minRow = possibleMinimas[distrMin(generator)];
-        
         //move queen to minConflictPosition
         //int conflictsBeforeChange = board[queen.first][queen.second];
-        queensConflict[queenPos] = { minRow, queen.second };
+        if (--board[minRow][queen.second] == 0) {
+            queensConflict.erase(queensConflict.begin() + queenPos);//move to non-conflict spot
+        }
+        else {
+            queensConflict[queenPos] = { minRow, queen.second };//remain in conflict spot
+        }
         updateConflicts(minRow, queen.second);
         updateConflicts(queen.first, queen.second, false);
-        /*if (!board[minRow][queen.second] && conflictsBeforeChange) {
-            conflictingQueens--;
-        }
-        else if (board[minRow][queen.second] && !conflictsBeforeChange) {
-            conflictingQueens++;
-        }*/
     }
     return queensConflict.empty();
 }
@@ -373,14 +330,16 @@ int main()
     for (int i = 0; i < n; i++) {
         board.push_back(vector<int>(n));
     }
-    int iterations = 50;
+    int iterations = 100;
     possibleMinimas = vector<int>(n);
     distr = uniform_int_distribution<>(0, n - 1);
     queens = vector<pair<int, int>>(n);
     generator = mt19937(rd());
+
     auto start = high_resolution_clock::now();
-    while (!iterativeMinConflicts(iterations)) {}
+    while (!iterativeMinConflicts(iterations));
     auto stop = high_resolution_clock::now();
+
     auto duration = duration_cast<milliseconds>(stop - start);
     cout << fixed;
     cout << setprecision(2);
