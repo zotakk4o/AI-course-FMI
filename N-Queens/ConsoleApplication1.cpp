@@ -281,7 +281,7 @@ bool iterativeMinConflicts(int iterations) {
     }
 
     unsafeQueens();
-    int retriesBeforeRandomMove = 10;
+    int retriesBeforeRandomMove = 15;
     while (!queensConflict.empty() && --iterations) {
         int minAttacks = n + 1;
         //int queenPos = distr(generator);
@@ -312,7 +312,7 @@ bool iterativeMinConflicts(int iterations) {
                 continue;
             }
             minRow = distr(generator);
-            retriesBeforeRandomMove = 20;
+            retriesBeforeRandomMove = 15;
         }
         else {
             uniform_int_distribution<> distrMin(0, possiblePositions);
