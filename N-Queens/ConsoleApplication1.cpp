@@ -71,16 +71,6 @@ bool areQueensSafe() {
     return unsafeQueens() == 0;
 }
 
-void printTable() {
-    int size = board.size();
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            cout << board[i][j] << " ";
-        }
-        cout << "\n";
-    }
-}
-
 int minConflictVal(const int& col) {
     int size = board.size();
     int minConflicts = INT_MAX;
@@ -254,37 +244,21 @@ void updateConflicts(const int& row, const int& col, const bool& increase = true
     }
 }
 
-bool iterativeMinConflicts(int iterations) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            board[i][j] = 0;
+void printTable() {
+    int size = queens.size();
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            cout << board[i][j] << " ";
         }
+        cout << "\n";
     }
+}
 
-    queensConflict.clear();
-
-    //place queens by MinConflicts
-    for (int col = 0; col < n; col++)
-    {
-        int minConfval = minConflictVal(col);
-        int possiblePositions = -1;
-        for (int row = 0; row < n; row++) {
-            if (board[row][col] == minConfval) {
-                possibleMinimas[++possiblePositions] = row;
-            }
-        }
-
-        uniform_int_distribution<> distrMin(0, possiblePositions);
-        int row = possibleMinimas[distrMin(generator)];
-        queens[col] = { row, col };
-        updateConflicts(row, col, true, true);
-    }
-
-    unsafeQueens();
+void iterativeMinConflicts() {
     int retriesBeforeRandomMove = 15;
-    while (!queensConflict.empty() && --iterations) {
-        int minAttacks = n + 1;
-        //int queenPos = distr(generator);
+    int minAttacks;
+    while (!queensConflict.empty()) {
+        minAttacks = n + 1;
         uniform_int_distribution<> queenGen(0, queensConflict.size() - 1);
         int queenPos = queenGen(generator);
         pair<int, int> queen = queensConflict[queenPos];
@@ -320,7 +294,7 @@ bool iterativeMinConflicts(int iterations) {
         }
 
         //move queen to minConflictPosition
-        if (--board[minRow][queen.second] == 0) {
+        if (board[minRow][queen.second] == 0) {
             queensConflict.erase(queensConflict.begin() + queenPos);//move to non-conflict spot
         }
         else {
@@ -329,8 +303,6 @@ bool iterativeMinConflicts(int iterations) {
         updateConflicts(minRow, queen.second);
         updateConflicts(queen.first, queen.second, false);
     }
-
-    return queensConflict.empty();
 }
 
 int main()
@@ -345,8 +317,27 @@ int main()
     queens = vector<pair<int, int>>(n);
     generator = mt19937(rd());
 
+    //place queens by MinConflicts
+    for (int col = 0; col < n; col++)
+    {
+        int minConfval = minConflictVal(col);
+        int possiblePositions = -1;
+        for (int row = 0; row < n; row++) {
+            if (board[row][col] == minConfval) {
+                possibleMinimas[++possiblePositions] = row;
+            }
+        }
+
+        uniform_int_distribution<> distrMin(0, possiblePositions);
+        int row = possibleMinimas[distrMin(generator)];
+        queens[col] = { row, col };
+        updateConflicts(row, col, true, true);
+    }
+
+    unsafeQueens();
+
     auto start = high_resolution_clock::now();
-    while (!iterativeMinConflicts(iterations));
+    iterativeMinConflicts();
     auto stop = high_resolution_clock::now();
 
     auto duration = duration_cast<milliseconds>(stop - start);
