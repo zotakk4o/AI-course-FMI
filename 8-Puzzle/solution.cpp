@@ -50,7 +50,7 @@ struct Table
                 }
 
                 this->h += abs(i - realRow) + abs(j - realCol);
-            }  
+            }
     }
 };
 
@@ -80,7 +80,7 @@ bool hasSolution(const Table& t) {
     for (int i = 0; i < puzzleSize; i++)
         for (int j = 0; j < puzzleSize; j++)
             flattened.push_back(t.table[i][j]);
-    
+
     for (int i = 0; i < puzzleSize; i++)
         for (int j = i + 1; j < puzzleSize; j++)
             if (flattened[i] && flattened[j] && flattened[i] > flattened[j])
@@ -95,7 +95,7 @@ void input()
     scanf_s("%d", &freeTileIndex);
     puzzleSize = (int)sqrt(n + 1);
     freeTileIndex = freeTileIndex == -1 ? n : freeTileIndex;
-    
+
     for (int i = 0; i < puzzleSize; i++) {
         vector<int> row;
         for (int j = 0; j < puzzleSize; j++)
@@ -121,7 +121,7 @@ void input()
             row.push_back(num);
         }
         finalState.table.push_back(row);
-    }   
+    }
 
     finalState.h = 0;
     finalState.x = freeTileIndex / puzzleSize;
@@ -131,15 +131,6 @@ void input()
         exit(1);
     }
     startState.calculateHeuristic();
-}
-
-bool tableAlreadyPassed(const Table& t, const vector<Table>& passedTables)
-{
-    int sz = passedTables.size();
-    for (int i = 0; i < sz; i++)
-        if (t == passedTables[i])
-            return true;
-    return false;
 }
 
 int aStar(vector<Table>& path, int g, int bound)
@@ -236,6 +227,7 @@ Some tests:
 7 8 6
 
 8
+-1
 4 0 3
 5 2 1
 7 8 6
