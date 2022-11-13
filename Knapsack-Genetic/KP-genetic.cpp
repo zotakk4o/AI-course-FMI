@@ -53,7 +53,7 @@ void mutateConfiguration(pair<int, string>& configruationToMutate) {
         configruationToMutate.first += weights[index];
         return;
     }
-    
+
     configruationToMutate.second[index] = '0';
     configruationToMutate.first -= weights[index];
 }
@@ -73,7 +73,7 @@ pair<string, int> generateBoolVector() {
         }
     }
 
-    return { res , currentWeight};
+    return { res , currentWeight };
 }
 
 pair<int, string> crossOver(const string& first, const string& second) {
@@ -118,7 +118,7 @@ void generatePopulation() {
             maxCurrentCost = cost;
         }
 
-        populated++;       
+        populated++;
     }
 }
 
@@ -160,14 +160,12 @@ int main()
     int populations = 0;
     int lastMaxCurrentCost = maxCurrentCost;
 
-    vector<pair<int, string>> children;
-    
-
-    while(populations != 5000) {
+    while (populations != 5000) {
         if (++steps % 5 == 0) {
             cout << maxCurrentCost << endl;
         }
 
+        vector<pair<int, string>> children;
         //generate 25% population 4 times
         for (int i = 0; i < 4; i++)
         {
@@ -209,8 +207,8 @@ int main()
                 int costOfCongiruation2 = getConfigurationCost(crossoverSecondFirst.second);
                 costOfCongiruation2 = crossoverSecondFirst.first > maxWeight ? 0 : costOfCongiruation2;
 
-                individuals.push_back({ costOfCongiruation1, crossoverFirstSecond.second });
-                individuals.push_back({ costOfCongiruation2, crossoverSecondFirst.second });
+                children.push_back({ costOfCongiruation1, crossoverFirstSecond.second });
+                children.push_back({ costOfCongiruation2, crossoverSecondFirst.second });
 
                 if (costOfCongiruation1 > maxCurrentCost) {
                     maxCurrentCost = costOfCongiruation1;
@@ -222,12 +220,15 @@ int main()
                     lastMaxCurrentCost = maxCurrentCost;
                 }
             }
+        }
 
-            //remove bad children
-            while (individuals.size() != initialIndividuals) {
-                int indexOfWorst = getIndexOfWorstIndividual();
-                individuals.erase(individuals.begin() + indexOfWorst);
-            }
+        //add children
+        move(children.begin(), children.end(), back_inserter(individuals));
+
+        //remove bad children
+        while (individuals.size() != initialIndividuals) {
+            int indexOfWorst = getIndexOfWorstIndividual();
+            individuals.erase(individuals.begin() + indexOfWorst);
         }
 
         populations++;
@@ -237,13 +238,12 @@ int main()
 }
 
 /*
-Example: 
+Example:
 5 3
 3 2
 1 5
 2 3
 
-Optimal: 8
 
 5000 24
 90 150
@@ -271,5 +271,4 @@ Optimal: 8
 900 1
 2000 150
 
-Optimal: 1130
 */
