@@ -86,7 +86,11 @@ bool hasSolution(const Table& t) {
             if (flattened[i] && flattened[j] && flattened[i] > flattened[j])
                 inversions++;
 
-    return inversions % 2 == 0;
+    if (n % 2 == 0) {
+        return inversions % 2 == 0;
+    }
+
+    return (inversions + freeTileIndex / puzzleSize) % 2 == 1;
 }
 
 void input()
